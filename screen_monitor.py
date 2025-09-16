@@ -18,8 +18,8 @@ from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtGui import QPainter, QPen
 import mss
 from PIL import Image
-import pytesseract
 import os
+from precise_ocr import PreciseOCR
 
 REGION_FILE = "region.json"
 
@@ -66,6 +66,7 @@ class OCRRegion:
     def __init__(self):
         self.region = {}
         self.load_region()
+        self.ocr_model = PreciseOCR()
 
     def load_region(self):
         if os.path.exists(REGION_FILE):
@@ -84,7 +85,9 @@ class OCRRegion:
             self.select_region()
         with mss.mss() as sct:
             sct_img = sct.grab(self.region)
+            img_path = "screenshot_region.png"
             img = Image.frombytes("RGB", sct_img.size, sct_img.rgb)
-            img.save("screenshot_region.png")
-            text = pytesseract.image_to_string(img, lang="rus", config="--psm 6")
-            return text
+            img.save(img_path)
+
+        text = self.ocr_model.extract_text(img_path)
+        return text
