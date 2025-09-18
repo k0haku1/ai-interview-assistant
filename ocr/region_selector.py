@@ -1,29 +1,21 @@
-# import mss
-# from PIL import Image
-# import pytesseract
-#
-# def capture_region_ocr():
-#     with mss.mss() as sct:
-#         monitor = sct.monitors[1]
-#         sct_img = sct.grab(monitor)
-#         img = Image.frombytes("RGB", sct_img.size, sct_img.rgb)
-#         img.save("fullscreen_screenshot.png")
-#         text = pytesseract.image_to_string(img)
-#         return text
-
 import sys
 import json
+import os
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtGui import QPainter, QPen
 import mss
 from PIL import Image
-import os
-from precise_ocr import PreciseOCR
+
+from .precise_ocr import PreciseOCR
 
 REGION_FILE = "region.json"
 
 class RegionSelector(QWidget):
+    """
+    Виджет для выбора области экрана для OCR.
+    Пользователь выделяет прямоугольник мышью.
+    """
     def __init__(self):
         super().__init__()
         self.start = None
@@ -62,7 +54,12 @@ class RegionSelector(QWidget):
             painter.setPen(pen)
             painter.drawRect(QRect(self.start, self.end))
 
+
 class OCRRegion:
+    """
+    Основной класс для работы с выбранной областью экрана.
+    Захватывает скриншот -> передаёт в PreciseOCR -> возвращает текст.
+    """
     def __init__(self):
         self.region = {}
         self.load_region()
@@ -74,13 +71,19 @@ class OCRRegion:
                 self.region = json.load(f)
 
     def select_region(self):
+        """
+        Открывает GUI для выбора области экрана.
+        """
         app = QApplication(sys.argv)
         selector = RegionSelector()
         selector.show()
         app.exec_()
         self.region = selector.region
 
-    def capture_region_ocr(self):
+    def capture_region_ocr(self) -> str:
+        """
+        Делает скриншот выбранной области и извлекает текст с помощью PreciseOCR.
+        """
         if not self.region:
             self.select_region()
         with mss.mss() as sct:
@@ -89,5 +92,4 @@ class OCRRegion:
             img = Image.frombytes("RGB", sct_img.size, sct_img.rgb)
             img.save(img_path)
 
-        text = self.ocr_model.extract_text(img_path)
-        return text
+        return self.ocr_model.extract_text(img_path)
