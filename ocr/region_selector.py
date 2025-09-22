@@ -12,10 +12,6 @@ from .precise_ocr import PreciseOCR
 REGION_FILE = "region.json"
 
 class RegionSelector(QWidget):
-    """
-    Виджет для выбора области экрана для OCR.
-    Пользователь выделяет прямоугольник мышью.
-    """
     def __init__(self):
         super().__init__()
         self.start = None
@@ -56,10 +52,6 @@ class RegionSelector(QWidget):
 
 
 class OCRRegion:
-    """
-    Основной класс для работы с выбранной областью экрана.
-    Захватывает скриншот -> передаёт в PreciseOCR -> возвращает текст.
-    """
     def __init__(self):
         self.region = {}
         self.load_region()
@@ -71,9 +63,6 @@ class OCRRegion:
                 self.region = json.load(f)
 
     def select_region(self):
-        """
-        Открывает GUI для выбора области экрана.
-        """
         app = QApplication(sys.argv)
         selector = RegionSelector()
         selector.show()
@@ -81,9 +70,6 @@ class OCRRegion:
         self.region = selector.region
 
     def capture_region_ocr(self) -> str:
-        """
-        Делает скриншот выбранной области и извлекает текст с помощью PreciseOCR.
-        """
         if not self.region:
             self.select_region()
         with mss.mss() as sct:

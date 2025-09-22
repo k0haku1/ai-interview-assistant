@@ -4,17 +4,11 @@ import markdown2
 import re
 
 def markdown_to_html_go(md_text: str) -> str:
-    """
-    Конвертирует Markdown в HTML с подсветкой Go-кода.
-    """
     html = markdown2.markdown(md_text, extras=["fenced-code-blocks", "code-friendly"])
     html = re.sub(r'<pre><code>', r'<pre><code class="language-go">', html)
     return html
 
 def show_response(text):
-    """
-    Отображает результат AI в отдельном Tkinter окне.
-    """
     root = tk.Tk()
     root.title("AI Response")
     root.geometry("1400x1200")
