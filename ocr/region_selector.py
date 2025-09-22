@@ -1,15 +1,10 @@
-import sys
-import json
 import os
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtCore import Qt, QRect
 from PyQt5.QtGui import QPainter, QPen
 import mss
 from PIL import Image
-
 from .precise_ocr import PreciseOCR
-
-REGION_FILE = "region.json"
 
 class RegionSelector(QWidget):
     def __init__(self):
@@ -38,9 +33,7 @@ class RegionSelector(QWidget):
             "width": rect.width(),
             "height": rect.height(),
         }
-        with open(REGION_FILE, "w") as f:
-            json.dump(self.region, f)
-        print("Новая область для OCR:", self.region)
+        print("[LOG] Новая область для OCR:", self.region)
         self.close()
 
     def paintEvent(self, event):
@@ -54,28 +47,38 @@ class RegionSelector(QWidget):
 class OCRRegion:
     def __init__(self):
         self.region = {}
-        self.load_region()
         self.ocr_model = PreciseOCR()
-
-    def load_region(self):
-        if os.path.exists(REGION_FILE):
-            with open(REGION_FILE, "r") as f:
-                self.region = json.load(f)
+        print("[LOG] OCRRegion инициализирован. Старые регионы игнорируются.")
 
     def select_region(self):
-        app = QApplication(sys.argv)
+        print("[LOG] Запуск выбора нового региона")
         selector = RegionSelector()
         selector.show()
-        app.exec_()
+
+        while selector.isVisible():
+            QApplication.processEvents()
+
         self.region = selector.region
+        print("[LOG] Регион выбран:", self.region)
+
+        if self.region:
+            with mss.mss() as sct:
+                sct_img = sct.grab(self.region)
+                home_dir = os.path.expanduser("~")
+                img_path = os.path.join(home_dir, "screenshot_region.png")
+                img = Image.frombytes("RGB", sct_img.size, sct_img.rgb)
+                img.save(img_path)
+            print(f"[LOG] Скрин выбранного региона сохранен: {img_path}")
 
     def capture_region_ocr(self) -> str:
         if not self.region:
-            self.select_region()
+            print("[LOG] Регион не задан")
         with mss.mss() as sct:
             sct_img = sct.grab(self.region)
-            img_path = "screenshot_region.png"
+            home_dir = os.path.expanduser("~")
+            img_path = os.path.join(home_dir, "screenshot_region.png")
             img = Image.frombytes("RGB", sct_img.size, sct_img.rgb)
             img.save(img_path)
-
-        return self.ocr_model.extract_text(img_path)
+        text = self.ocr_model.extract_text(img_path)
+        print(f"[LOG] OCR завершен, текст длиной {len(text)} символов")
+        return text

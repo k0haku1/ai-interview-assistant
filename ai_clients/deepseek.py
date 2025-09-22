@@ -1,4 +1,6 @@
 import requests
+import time
+import json
 from config import DEEPSEEK_API_KEY
 
 class DeepSeekClient:
@@ -30,11 +32,21 @@ class DeepSeekClient:
         headers = {"Authorization": f"Bearer {DEEPSEEK_API_KEY}", "Content-Type": "application/json"}
         data = {"model": "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8", "messages": self.messages, "temperature": 0.3}
 
+        print("[DEBUG] Отправка запроса к DeepSeek API...")
+
         try:
-            resp = requests.post(self.endpoint, headers=headers, json=data)
+            start_time = time.time()
+            resp = requests.post(self.endpoint, headers=headers, json=data, timeout=30)
             resp.raise_for_status()
+            duration = time.time() - start_time
+
+            print(f"[DEBUG] Ответ получен за {duration:.2f} сек, статус: {resp.status_code}")
             answer = resp.json()['choices'][0]['message']['content']
             self.messages.append({"role": "assistant", "content": answer})
             return answer
+        except requests.exceptions.Timeout:
+            print("[ERROR] Тайм-аут при обращении к API")
+            return {"error": "Timeout при обращении к DeepSeek API"}
         except Exception as e:
+            print("[ERROR] Ошибка при запросе к API:", str(e))
             return {"error": str(e)}
