@@ -33,7 +33,11 @@ class MainWindow(QMainWindow):
         self.ai_client = ai_client
 
         self.setWindowTitle("AI Interview Tool")
-        self.setGeometry(300, 200, 1000, 800)
+
+        self.setGeometry(300, 200, 800, 600)
+
+        self.setWindowOpacity(0.65)
+
 
         self.web_view = QWebEngineView(self)
         self.setCentralWidget(self.web_view)
