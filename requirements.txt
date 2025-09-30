@@ -1,0 +1,9 @@
+requests>=2.30.0
+PyQt5>=5.15.9
+PyQtWebEngine>=5.15.2
+markdown2>=2.4.5
+opencv-python>=4.8.0.74
+easyocr>=1.6.2
+mss>=7.0.0
+Pillow>=10.1.0
+numpy>=1.26.0

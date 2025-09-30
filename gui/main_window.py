@@ -1,4 +1,5 @@
-from PyQt5.QtWidgets import QMainWindow, QTextEdit, QAction
+from PyQt5.QtWidgets import QMainWindow, QTextEdit, QAction, QSlider, QVBoxLayout, QWidget
+from PyQt5.QtCore import Qt
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtGui import QKeySequence
 import markdown2
@@ -17,7 +18,7 @@ def markdown_to_html_go(md_text: str) -> str:
         <script>hljs.highlightAll();</script>
         <style>
             body {{ background-color: #1e1e1e; color: #ffffff; font-family: Consolas, monospace; padding: 20px; }}
-            pre {{ background: #2d2d2d; padding: 10px; border-radius: 8px; overflow-x: auto; font-size: 14px; }}
+            pre {{ background: #2d2d2d; padding: 2px; border-radius: 2px; overflow-x: hidden; white-space: pre-wrap; font-size: 14px; }}
             h3 {{ color: #ffffff; }}
             hr {{ border: 1px solid #444; }}
         </style>
@@ -32,15 +33,70 @@ class MainWindow(QMainWindow):
         self.ocr = ocr
         self.ai_client = ai_client
 
+        self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+
         self.setWindowTitle("AI Interview Tool")
-
         self.setGeometry(300, 200, 800, 600)
+        self.setWindowOpacity(0.75)
 
-        self.setWindowOpacity(0.65)
+        self.setStyleSheet("""
+                    QMainWindow {
+                        border-left: 0px;
+                        border-right: 0px;
+                        border-bottom: 0px;
+                    }
+                """)
 
+        central_widget = QWidget(self)
+        central_widget.setContentsMargins(0, 0, 0, 0)
+        central_widget.setStyleSheet("background-color: #1e1e1e;")
+        layout = QVBoxLayout(central_widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         self.web_view = QWebEngineView(self)
-        self.setCentralWidget(self.web_view)
+        self.web_view.setStyleSheet("background-color: #1e1e1e; border: none;")
+        layout.addWidget(self.web_view)
+
+        self.opacity_slider = QSlider(Qt.Horizontal, self)
+        self.opacity_slider.setRange(30, 100)
+        self.opacity_slider.setValue(75)
+        self.opacity_slider.valueChanged.connect(self.change_opacity)
+
+        self.opacity_slider.setStyleSheet("""
+        QSlider {
+            background: #1e1e1e;  
+            margin: 0px;
+            padding: 0px;
+        }
+        QSlider::groove:horizontal {
+            height: 6px;
+            background: #2d2d2d;
+            border-radius: 3px;
+        }
+        QSlider::handle:horizontal {
+            background: #9b59b6;
+            border: none;
+            width: 18px;
+            height: 18px;
+            margin: -6px 0;  
+            border-radius: 9px;
+        }
+        QSlider::handle:horizontal:hover {
+            background: #b276d8;
+        }
+        QSlider::sub-page:horizontal {
+            background: #9b59b6;
+            border-radius: 3px;
+        }
+        QSlider::add-page:horizontal {
+            background: #2d2d2d;
+            border-radius: 3px;
+        }
+        """)
+        layout.addWidget(self.opacity_slider)
+
+        self.setCentralWidget(central_widget)
 
         action_new_region = QAction(self)
         action_new_region.setShortcut(QKeySequence("Ctrl+Alt+1"))
@@ -48,6 +104,9 @@ class MainWindow(QMainWindow):
         self.addAction(action_new_region)
 
         self.html_buffer = ""
+
+    def change_opacity(self, value):
+        self.setWindowOpacity(value / 100.0)
 
     def capture_and_analyze(self):
         self.ocr.select_region()
