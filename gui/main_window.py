@@ -56,6 +56,20 @@ class MainWindow(QMainWindow):
 
         self.web_view = QWebEngineView(self)
         self.web_view.setStyleSheet("background-color: #1e1e1e; border: none;")
+
+        initial_html = """
+        <html>
+        <head>
+        <meta charset="UTF-8">
+        <style>
+            body { background-color: #1e1e1e; color: #ffffff; }
+        </style>
+        </head>
+        <body></body>
+        </html>
+        """
+        self.web_view.setHtml(initial_html)
+
         layout.addWidget(self.web_view)
 
         self.opacity_slider = QSlider(Qt.Horizontal, self)
