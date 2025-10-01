@@ -20,10 +20,39 @@ def markdown_to_html_go(md_text: str) -> str:
         <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
         <script>hljs.highlightAll();</script>
         <style>
-            body {{ background-color: #1e1e1e; color: #ffffff; font-family: Consolas, monospace; padding: 20px; }}
-            pre {{ background: #2d2d2d; padding: 2px; border-radius: 2px; overflow-x: hidden; white-space: pre-wrap; font-size: 14px; }}
+            body {{
+                background-color: #1e1e1e;
+                color: #ffffff;
+                font-family: "Ubuntu", "Cantarell", "Helvetica Neue", Arial, sans-serif;
+                padding: 20px;
+                font-size: 12px;
+                font-weight: 500;
+            }}
+            pre {{
+                background: #2d2d2d;
+                padding: 6px;
+                border-radius: 4px;
+                overflow-x: auto;
+                white-space: pre-wrap;
+                font-size: 10px;
+                font-weight: bold;
+            }}
             h3 {{ color: #ffffff; }}
             hr {{ border: 1px solid #444; }}
+            ::-webkit-scrollbar {{
+                width: 8px;
+                height: 8px;
+            }}
+            ::-webkit-scrollbar-track {{
+                background: #1e1e1e;
+            }}
+            ::-webkit-scrollbar-thumb {{
+                background: #555;
+                border-radius: 4px;
+            }}
+            ::-webkit-scrollbar-thumb:hover {{
+                background: #777;
+            }}
         </style>
     </head>
     <body>{html}</body>

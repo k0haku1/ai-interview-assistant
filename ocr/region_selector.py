@@ -1,7 +1,7 @@
 import os
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtCore import Qt, QRect
-from PyQt5.QtGui import QPainter, QPen
+from PyQt5.QtGui import QPainter, QPen, QColor
 import mss
 from PIL import Image
 from .precise_ocr import PreciseOCR
@@ -39,7 +39,7 @@ class RegionSelector(QWidget):
     def paintEvent(self, event):
         if self.start and self.end:
             painter = QPainter(self)
-            pen = QPen(Qt.red, 2)
+            pen = QPen(QColor("#00c9c3"), 2)
             painter.setPen(pen)
             painter.drawRect(QRect(self.start, self.end))
 

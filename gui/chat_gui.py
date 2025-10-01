@@ -85,9 +85,10 @@ class ChatWindow(QWidget):
                 body {{
                     background-color:#1e1e1e; 
                     color:#ffffff; 
-                    font-family:Consolas, monospace; 
+                    font-family: "Ubuntu", "Cantarell", "Helvetica Neue", Arial, sans-serif;
                     padding:10px; 
                     font-size:12px; 
+                    font-weight: 500;
                 }}
                 pre {{
                     background:#2d2d2d; 
@@ -100,6 +101,22 @@ class ChatWindow(QWidget):
                 }}
                 h1,h2,h3,h4,h5,h6 {{ color:#ffffff; }}
                 p {{ margin:4px 0; font-size:12px; }}
+
+              
+                ::-webkit-scrollbar {{
+                    width: 8px;
+                    height: 8px;
+                }}
+                ::-webkit-scrollbar-track {{
+                    background: #1e1e1e;
+                }}
+                ::-webkit-scrollbar-thumb {{
+                    background: #555;
+                    border-radius: 4px;
+                }}
+                ::-webkit-scrollbar-thumb:hover {{
+                    background: #777;
+                }}
             </style>
         </head>
         <body>{buffer}</body>
