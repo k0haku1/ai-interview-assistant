@@ -1,2 +1,3 @@
 source venv/bin/activate -- запуск venv
 python main.py -- run
+pip install --upgrade iointel

@@ -2,3 +2,4 @@ DEEPSEEK_API_KEY = "io-v2-eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJvd25lciI6IjE2Y
 
 #"model": "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
 #"model": "Intel/Qwen3-Coder-480B-A35B-Instruct-int4-mixed-ar",
+#"openai/gpt-oss-120b"

@@ -43,7 +43,7 @@ class DeepSeekClient:
 
         try:
             start_time = time.time()
-            resp = requests.post(self.endpoint, headers=headers, json=data, timeout=30)
+            resp = requests.post(self.endpoint, headers=headers, json=data, timeout=180)
             resp.raise_for_status()
             duration = time.time() - start_time
 

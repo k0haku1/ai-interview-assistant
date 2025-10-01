@@ -2,6 +2,7 @@ from ocr import OCRRegion
 import sys
 import time
 from ai_clients import DeepSeekClient
+from ai_clients import DeepSeekAgentClient
 from PyQt5.QtWidgets import QApplication
 from ai_clients import AiLocalClient
 from gui import MainWindow
@@ -17,11 +18,15 @@ def main():
     print(f"[{time.strftime('%H:%M:%S')}] OCRRegion инициализирован")
 
     print(f"[{time.strftime('%H:%M:%S')}] Инициализация AI клиента...")
-    ai_client = DeepSeekClient()
+    # ai_client = DeepSeekClient()
+    ai_agent_client = DeepSeekAgentClient()
     print(f"[{time.strftime('%H:%M:%S')}] AI клиент готов")
 
+
+    print(f"[{time.strftime('%H:%M:%S')}] AI-local клиент готов")
+    local_ai = AiLocalClient()
     print(f"[{time.strftime('%H:%M:%S')}] Создание MainWindow...")
-    window = MainWindow(ocr, ai_client)
+    window = MainWindow(ocr, ai_agent_client, local_ai)
     window.show()
     print(f"[{time.strftime('%H:%M:%S')}] MainWindow готов. GUI запущен.")
 

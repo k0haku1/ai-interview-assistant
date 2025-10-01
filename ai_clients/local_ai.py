@@ -7,11 +7,13 @@ class AiLocalClient:
         self.model = model
         self.messages = []
 
-    def answer(self, question: str):
-        self.messages.append({
-            "role": "user",
-            "content": question
-        })
+    def answer_stream(self, question: str):
+        """
+        Потоковый генератор ответа.
+        Возвращает частичные куски текста по мере генерации.
+        """
+        # Сохраняем сообщение пользователя
+        self.messages.append({"role": "user", "content": question})
 
         response = requests.post(
             self.endpoint,
@@ -19,17 +21,17 @@ class AiLocalClient:
             stream=True
         )
 
-        print("\n response:\n")
+        full_answer = ""
         for line in response.iter_lines():
             if line:
                 data = json.loads(line.decode("utf-8"))
                 if "message" in data:
-                    print(data["message"]["content"], end="", flush=True)
+                    chunk = data["message"]["content"]
+                    full_answer += chunk
+                    yield full_answer  # отдаём всё, что есть на данный момент
                 if data.get("done"):
                     break
-        print("\n--- end ---\n")
 
-        self.messages.append({
-            "role": "assistant",
-            "content": data.get("message", {}).get("content", "")
-        })
+        # Сохраняем финальный ответ в историю
+        self.messages.append({"role": "assistant", "content": full_answer})
+        yield full_answer  # финальный кусок
