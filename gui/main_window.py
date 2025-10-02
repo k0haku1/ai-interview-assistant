@@ -68,123 +68,118 @@ class MainWindow(QMainWindow):
 
         self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
         self.setWindowTitle("AI Interview Tool")
-        self.setGeometry(300, 200, 800, 600)
+        self.setGeometry(300, 200, 900, 600)
         self.setWindowOpacity(0.75)
+        self.setStyleSheet("QMainWindow { border: 0px; }")
 
-        self.setStyleSheet("""
-            QMainWindow {
-                border-left: 0px;
-                border-right: 0px;
-                border-bottom: 0px;
-            }
-        """)
+        main_splitter = QSplitter(Qt.Horizontal)
+        main_splitter.setStyleSheet("background-color: #1e1e1e;")
 
-        splitter = QSplitter(Qt.Horizontal)
-        splitter.setStyleSheet("background-color: #1e1e1e;")
-
-        left_widget = QWidget(self)
+        left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
         left_layout.setContentsMargins(0, 0, 0, 0)
-        left_layout.setSpacing(0)
+        left_layout.setSpacing(2)
 
-        self.web_view = QWebEngineView(self)
+        self.web_view = QWebEngineView()
         self.web_view.setStyleSheet("background-color: #1e1e1e; border: none;")
         self.web_view.page().setBackgroundColor(QColor("#1e1e1e"))
         self.web_view.setHtml("""
-            <html>
-            <head><meta charset="UTF-8">
+            <html><head><meta charset="UTF-8">
             <style>body { background-color: #1e1e1e; color: #ffffff; }</style>
             </head><body></body></html>
         """)
         left_layout.addWidget(self.web_view)
 
-        self.opacity_slider = QSlider(Qt.Horizontal, self)
+        self.opacity_slider = QSlider(Qt.Horizontal)
         self.opacity_slider.setRange(30, 100)
         self.opacity_slider.setValue(75)
         self.opacity_slider.valueChanged.connect(self.change_opacity)
         self.opacity_slider.setStyleSheet("""
-        QSlider {
-            background: #1e1e1e;  
-            margin: 0px;
-            padding: 0px;
-        }
-        QSlider::groove:horizontal {
-            height: 6px;
-            background: #2d2d2d;
-            border-radius: 3px;
-        }
-        QSlider::handle:horizontal {
-            background: #9b59b6;
-            border: none;
-            width: 18px;
-            height: 18px;
-            margin: -6px 0;  
-            border-radius: 9px;
-        }
-        QSlider::handle:horizontal:hover {
-            background: #b276d8;
-        }
-        QSlider::sub-page:horizontal {
-            background: #9b59b6;
-            border-radius: 3px;
-        }
-        QSlider::add-page:horizontal {
-            background: #2d2d2d;
-            border-radius: 3px;
-        }
+            QSlider { background: #1e1e1e; margin: 0; padding: 0; }
+            QSlider::groove:horizontal { height: 6px; background: #2d2d2d; border-radius: 3px; }
+            QSlider::handle:horizontal { background: #9b59b6; width: 18px; height: 18px; margin: -6px 0; border-radius: 9px; }
+            QSlider::handle:horizontal:hover { background: #b276d8; }
+            QSlider::sub-page:horizontal { background: #9b59b6; border-radius: 3px; }
+            QSlider::add-page:horizontal { background: #2d2d2d; border-radius: 3px; }
         """)
         left_layout.addWidget(self.opacity_slider)
 
-        self.chat_button = QPushButton("Открыть чат", self)
+        self.options_button = QPushButton("options")
+        self.options_button.setStyleSheet("""
+            QPushButton { background-color: #2d2d2d; color: #fff; border: none; padding: 6px; border-radius: 4px; }
+            QPushButton:hover { background-color: #3d3d3d; }
+        """)
+        self.options_button.clicked.connect(self.toggle_options)
+        left_layout.addWidget(self.options_button)
+
+        self.option_buttons_widget = QWidget()
+        self.option_buttons_layout = QVBoxLayout(self.option_buttons_widget)
+        self.option_buttons_layout.setContentsMargins(0, 0, 0, 0)
+        self.option_buttons_layout.setSpacing(2)
+        for opt in ["result", "code review", "add func", "algorithm", "SQL"]:
+            btn = QPushButton(opt)
+            btn.setStyleSheet("""
+                QPushButton { background-color: #2d2d2d; color: #fff; border: none; padding: 6px; border-radius: 4px; text-align: left; }
+                QPushButton:hover { background-color: #3d3d3d; }
+            """)
+            btn.clicked.connect(lambda checked, o=opt: self.analyze_with_option(o))
+            self.option_buttons_layout.addWidget(btn)
+        left_layout.addWidget(self.option_buttons_widget)
+        self.option_buttons_widget.hide()
+
+        main_splitter.addWidget(left_widget)
+
+        self.chat_widget = ChatWindow(self.local_ai)
+        main_splitter.addWidget(self.chat_widget)
+        self.chat_widget.hide()  # по умолчанию скрыт
+
+        self.setCentralWidget(main_splitter)
+
+        action = QAction(self)
+        action.setShortcut(QKeySequence("Ctrl+Alt+1"))
+        action.triggered.connect(self.capture_and_store_text)
+        self.addAction(action)
+
+        self.html_buffer = ""
+        self.ocr_buffer = ""
+
+        self.chat_button = QPushButton("chat AI", self)
         self.chat_button.setStyleSheet("""
-                   QPushButton {
-                       background-color: #2d2d2d;
-                       color: #ffffff;
-                       border: none;
-                       padding: 6px;
-                       border-radius: 4px;
-                   }
-                   QPushButton:hover {
-                       background-color: #3d3d3d;
-                   }
-               """)
+            QPushButton { background-color: #2d2d2d; color: #fff; border: none; padding: 6px; border-radius: 4px; }
+            QPushButton:hover { background-color: #3d3d3d; }
+        """)
         self.chat_button.clicked.connect(self.toggle_chat)
         left_layout.addWidget(self.chat_button)
 
-        splitter.addWidget(left_widget)
+    def capture_and_store_text(self):
+        self.ocr.select_region()
+        self.ocr_buffer = self.ocr.capture_region_ocr()
 
-        self.chat_widget = ChatWindow(self.local_ai)
-        splitter.addWidget(self.chat_widget)
-        self.chat_widget.hide()
-
-        self.setCentralWidget(splitter)
-
-        action_new_region = QAction(self)
-        action_new_region.setShortcut(QKeySequence("Ctrl+Alt+1"))
-        action_new_region.triggered.connect(self.capture_and_analyze)
-        self.addAction(action_new_region)
-
-        self.html_buffer = ""
+    def analyze_with_option(self, option: str):
+        if self.ocr_buffer.strip():
+            answer = self.ai_client.review_code(self.ocr_buffer, option)
+            md_html = markdown_to_html_go(str(answer))
+            self.html_buffer += f"<h3>===== {option} =====</h3>{md_html}<hr>"
+            self.web_view.setHtml(self.html_buffer)
 
     def toggle_chat(self):
         if self.chat_widget.isVisible():
             self.chat_widget.hide()
-            self.chat_button.setText("Открыть чат")
+            self.chat_button.setText("chat AI")
         else:
             self.chat_widget.show()
-            self.chat_button.setText("Закрыть чат")
+            self.chat_button.setText("❌")
+
+    def toggle_options(self):
+        if self.option_buttons_widget.isVisible():
+            self.option_buttons_widget.hide()
+            self.options_button.setText("options")
+        else:
+            self.option_buttons_widget.show()
+            self.options_button.setText("❌")
 
     def change_opacity(self, value):
         self.setWindowOpacity(value / 100.0)
-
-    def capture_and_analyze(self):
-        self.ocr.select_region()
-        text = self.ocr.capture_region_ocr()
-        if text.strip():
-            answer = self.ai_client.review_code(text)
-            md_html = markdown_to_html_go(str(answer))
-            self.html_buffer += f"<h3>===== AI Answer =====</h3>{md_html}<hr>"
-            self.web_view.setHtml(self.html_buffer)
 
     def run(self):
         self.show()

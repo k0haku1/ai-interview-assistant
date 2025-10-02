@@ -5,22 +5,19 @@ from ai_clients import DeepSeekClient, DeepSeekAgentClient
 
 class DeepSeekFallbackClient:
     def __init__(self, retries: int = 2, delay: int = 3):
-        """
-        retries - сколько раз пробовать API перед переключением
-        delay   - задержка между попытками (сек)
-        """
+
         self.api_client = DeepSeekClient()
         self.agent_client = DeepSeekAgentClient()
         self.retries = retries
         self.delay = delay
 
-    def review_code(self, code: str) -> str | dict:
+    def review_code(self, code: str, option: str = "результат") -> str | dict:
         last_error = None
 
         for attempt in range(1, self.retries + 1):
             try:
                 print(f"[INFO] Попытка {attempt}/{self.retries} через API клиент...")
-                answer = self.api_client.review_code(code)
+                answer = self.api_client.review_code(code, option)  # <-- передаем option
 
                 if isinstance(answer, dict) and "error" in answer:
                     last_error = answer["error"]
@@ -37,4 +34,4 @@ class DeepSeekFallbackClient:
                 time.sleep(self.delay)
 
         print("[INFO] Все попытки API неудачны. Переключение на агент-клиент...")
-        return self.agent_client.review_code(code)
+        return self.agent_client.review_code(code, option)
