@@ -15,6 +15,7 @@ class DeepSeekClient:
                     "У тебя две задачи: "
                     "1) Если на входе код — проведи код ревью: оцени стиль, архитектуру, эффективность, возможные ошибки. "
                     "   Дай рекомендации по разделению ответственности у функций/структур и предложи улучшения. "
+                    "Обязательно: добавь построчные комментарии к коду (как в ревью Pull Request). "
                     "Особенно внимательно смотри со стороны многгопоточки и оптимизации работы горутин"
                     "2) Если на входе алгоритмическая задача — реши её на Go. "
                     "   Обязательно: добавь построчные комментарии к коду (как в ревью Pull Request). "
@@ -43,7 +44,7 @@ class DeepSeekClient:
 
         try:
             start_time = time.time()
-            resp = requests.post(self.endpoint, headers=headers, json=data, timeout=180)
+            resp = requests.post(self.endpoint, headers=headers, json=data, timeout=30)
             resp.raise_for_status()
             duration = time.time() - start_time
 
